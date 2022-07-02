@@ -78,7 +78,7 @@ public abstract class AbstractDisease implements Serializable,Disease {
      * @return the list of Symptom
      */
     @Override
-    public List<Symptom> getSymtoms() {
+    public List<Symptom> getSymptoms() {
         return symptoms;
     }
 
@@ -96,5 +96,14 @@ public abstract class AbstractDisease implements Serializable,Disease {
      */
     public void setPeriod(int period) {
         this.period = period;
+    }
+
+    /**
+     * set the damage this disease deal to player foreach period
+     * set it to 0 to disable this
+     * @param damage
+     */
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
 }

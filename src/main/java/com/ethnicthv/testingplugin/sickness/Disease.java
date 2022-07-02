@@ -10,5 +10,5 @@ public interface Disease {
     boolean isBad();
     boolean isCurable();
     boolean isInfectious();
-    List<Symptom> getSymtoms();
+    List<Symptom> getSymptoms();
 }
