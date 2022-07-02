@@ -1,51 +1,14 @@
 package com.ethnicthv.testingplugin.sickness;
 
-import java.io.Serializable;
+import com.ethnicthv.testingplugin.sickness.symptom.Symptom;
 
-public abstract class Disease implements Serializable {
-    private String NAME;
-    private boolean isBad, isCurable, isInfectious;
-    private int damage = 1;
-    private int period = 3000;
+import java.util.List;
 
-    public Disease(String NAME, boolean isBad, boolean isCurable, boolean isInfectious){
-        this.NAME = NAME;
-        this.isBad = isBad;
-        this.isCurable = isCurable;
-        this.isInfectious = isInfectious;
-    }
-
-    //What this sickness do
-
-    /**
-     * The
-     */
-    void onTick(){
-
-    }
-
-    /**
-     * Get the Name of this Disease
-     * @return Name of this Disease
-     */
-    String getName(){
-        return NAME;
-    }
-
-    //
-    /**
-     *Is dealling damage
-     * @return -true if this deal damage
-     *         -false if this don't deal dam
-     */
-    boolean isBad(){
-        return isBad;
-    }
-
-    //Is curable
-    boolean isCurable(){
-        return isCurable;
-    }
-
-    //Is infectious
+public interface Disease {
+    void onTick();
+    String getName();
+    boolean isBad();
+    boolean isCurable();
+    boolean isInfectious();
+    List<Symptom> getSymtoms();
 }
