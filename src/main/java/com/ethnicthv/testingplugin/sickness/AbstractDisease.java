@@ -9,16 +9,17 @@ import java.util.List;
 
 public abstract class AbstractDisease implements Serializable,Disease {
     private final String NAME;
-    private final boolean isBad, isCurable, isInfectious;
+    private final boolean isBad, isCurable;
     private int damage = 1;
     private int period = 3000;
     private List<Symptom> symptoms;
+    private final InfectionLevel level;
 
-    public AbstractDisease(String NAME, boolean isBad, boolean isCurable, boolean isInfectious){
+    public AbstractDisease(String NAME, boolean isBad, boolean isCurable, InfectionLevel level){
         this.NAME = NAME;
         this.isBad = isBad;
         this.isCurable = isCurable;
-        this.isInfectious = isInfectious;
+        this.level = level;
         symptoms = new ArrayList<>();
     }
 
@@ -72,7 +73,12 @@ public abstract class AbstractDisease implements Serializable,Disease {
      */
     @Override
     public boolean isInfectious() {
-        return isInfectious;
+        return level == InfectionLevel.NONE ? false : true;
+    }
+
+    @Override
+    public InfectionLevel getInfectionLevel() {
+        return null;
     }
 
     /**
