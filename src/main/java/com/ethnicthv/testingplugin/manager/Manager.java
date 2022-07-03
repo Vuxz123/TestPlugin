@@ -1,6 +1,8 @@
 package com.ethnicthv.testingplugin.manager;
 
 import com.ethnicthv.testingplugin.sickness.Disease;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -9,10 +11,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class Manager implements Listener {
     private String path;
+
+    private final Ticker ticker;
 
     Map<UUID, List<Disease>> data = new HashMap<>();
 
@@ -31,6 +37,9 @@ public class Manager implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this,plugin);
         //
 
+        //Setup ticker
+        ticker = new Ticker(plugin);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, ticker, 20L, 20L);
     }
 
     @EventHandler
@@ -103,5 +112,34 @@ public class Manager implements Listener {
         }
         file = null;
         return false;
+    }
+
+    class Ticker implements Runnable {
+        JavaPlugin plugin;
+
+        Ticker(JavaPlugin plugin){
+            this.plugin = plugin;
+        }
+
+        @Override
+        public void run() {
+            data.forEach(new BiConsumer<UUID, List<Disease>>() {
+                @Override
+                public void accept(UUID uuid, List<Disease> diseases) {
+                    Player player = plugin.getServer().getPlayer(uuid);
+                    diseases.forEach(new Consumer<Disease>() {
+                        @Override
+                        public void accept(Disease disease) {
+                            Bukkit.getScheduler().runTask(plugin, new Runnable() {
+                                @Override
+                                public void run() {
+                                    disease.onTick(player);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     }
 }

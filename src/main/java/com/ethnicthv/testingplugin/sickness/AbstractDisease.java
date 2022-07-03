@@ -1,6 +1,7 @@
 package com.ethnicthv.testingplugin.sickness;
 
 import com.ethnicthv.testingplugin.sickness.symptom.Symptom;
+import org.bukkit.entity.Player;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,9 +25,10 @@ public abstract class AbstractDisease implements Serializable,Disease {
     //What this sickness do
     /**
      * The
+     * @param player
      */
     @Override
-    public void onTick(){
+    public void onTick(Player player){
 
     }
 
