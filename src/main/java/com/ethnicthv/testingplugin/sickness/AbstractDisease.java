@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractDisease implements Serializable,Disease {
-    private String NAME;
-    private boolean isBad, isCurable, isInfectious;
+    private final String NAME;
+    private final boolean isBad, isCurable, isInfectious;
     private int damage = 1;
     private int period = 3000;
     private List<Symptom> symptoms;
@@ -25,7 +25,7 @@ public abstract class AbstractDisease implements Serializable,Disease {
     //What this sickness do
     /**
      * The
-     * @param player
+     * @param player the player that has this disease
      */
     @Override
     public void onTick(Player player){
@@ -86,7 +86,7 @@ public abstract class AbstractDisease implements Serializable,Disease {
 
     /**
      * Set the list of symptom this disease has
-     * @param symptoms
+     * @param symptoms the array of symptoms this disease has
      */
     public void setSymptoms(List<Symptom> symptoms) {
         this.symptoms = symptoms;
@@ -94,18 +94,26 @@ public abstract class AbstractDisease implements Serializable,Disease {
 
     /**
      * Set the period for each time this disease affect player
-     * @param period
+     * @param period the number of ticks for each call
      */
     public void setPeriod(int period) {
         this.period = period;
     }
 
     /**
-     * set the damage this disease deal to player foreach period
+     * set the damage this disease deal to player each period
      * set it to 0 to disable this
-     * @param damage
+     * @param damage the damage deal to the infected each call
      */
     public void setDamage(int damage) {
         this.damage = damage;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public int getPeriod() {
+        return period;
     }
 }

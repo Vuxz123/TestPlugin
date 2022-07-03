@@ -8,21 +8,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class Manager implements Listener {
-    private String path;
+    private final String path;
 
     private final Ticker ticker;
 
     Map<UUID, List<Disease>> data = new HashMap<>();
 
-    public Manager(JavaPlugin plugin){
+    public Manager(@NotNull JavaPlugin plugin){
         //Create data folder
         path = plugin.getDataFolder().getAbsolutePath() + "/playerdata";
         File file = new File(path);
@@ -72,9 +71,9 @@ public class Manager implements Listener {
 
     /**
      * Load data of a player
-     * @param uuid
+     * @param uuid the uuid of joining player
      * @return return if the loading is success
-     * @throws IOException
+     * @throws IOException throw when something wrong with input
      */
     boolean load(UUID uuid) throws IOException {
         File file = new File(path + "/" + uuid.toString());
@@ -83,6 +82,11 @@ public class Manager implements Listener {
             ObjectInputStream objectinput = new ObjectInputStream(input);
             try {
                 List<Disease> temp = (List<Disease>) objectinput.readObject();
+                if (data.containsKey(uuid)) {
+                    data.replace(uuid, temp);
+                } else {
+                    data.put(uuid, temp);
+                }
                 return true;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -90,15 +94,14 @@ public class Manager implements Listener {
             objectinput.close();
             input.close();
         }
-        file = null;
         return false;
     }
 
     /**
      * Save data of a player
-     * @param uuid
+     * @param uuid the uuid of leaving player
      * @return return if the saving is success
-     * @throws IOException
+     * @throws IOException throw when something wrong with output
      */
     boolean save(UUID uuid) throws IOException {
         File file = new File(path + "/" + uuid.toString());
@@ -110,7 +113,6 @@ public class Manager implements Listener {
             output.close();
             return true;
         }
-        file = null;
         return false;
     }
 
@@ -123,22 +125,9 @@ public class Manager implements Listener {
 
         @Override
         public void run() {
-            data.forEach(new BiConsumer<UUID, List<Disease>>() {
-                @Override
-                public void accept(UUID uuid, List<Disease> diseases) {
-                    Player player = plugin.getServer().getPlayer(uuid);
-                    diseases.forEach(new Consumer<Disease>() {
-                        @Override
-                        public void accept(Disease disease) {
-                            Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                                @Override
-                                public void run() {
-                                    disease.onTick(player);
-                                }
-                            });
-                        }
-                    });
-                }
+            data.forEach((uuid, diseases) -> {
+                Player player = plugin.getServer().getPlayer(uuid);
+                diseases.forEach(disease -> Bukkit.getScheduler().runTask(plugin, () -> disease.onTick(player)));
             });
         }
     }

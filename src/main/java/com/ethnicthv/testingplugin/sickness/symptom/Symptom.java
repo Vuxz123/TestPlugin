@@ -6,7 +6,8 @@ public interface Symptom {
     /**
      * Run this to run the effect of this symptom to a player or a group of players
      *
-     * @return
+     * @return -true if success
+     *         -false if fail
      */
     boolean doEffect(Player... player);
 }
