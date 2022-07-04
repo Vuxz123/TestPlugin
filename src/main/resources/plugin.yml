@@ -2,3 +2,6 @@ name: TestingPlugin
 version: '${project.version}'
 main: com.ethnicthv.testingplugin.TestingPlugin
 api-version: 1.19
+commands:
+  test:
+    description: a Test command

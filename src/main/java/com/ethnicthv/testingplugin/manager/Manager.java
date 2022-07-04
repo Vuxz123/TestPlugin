@@ -41,6 +41,21 @@ public class Manager implements Listener {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, ticker, 20L, 20L);
     }
 
+    /**
+     * Add a Disease to a Player
+     * @param uuid the uuid of infected player
+     * @param disease the disease that infecting the player
+     */
+    public void addDisease(UUID uuid, Disease disease){
+        if (data.get(uuid).contains(disease)){
+            int index = data.get(uuid).indexOf(disease);
+            Disease temp = data.get(uuid).get(index);
+
+        }else{
+            data.get(uuid).add(disease);
+        }
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         UUID uuid = event.getPlayer().getUniqueId();
