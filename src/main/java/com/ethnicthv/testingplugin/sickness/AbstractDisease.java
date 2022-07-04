@@ -7,12 +7,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractDisease implements Serializable,Disease {
+public abstract class AbstractDisease implements Serializable , Disease {
+    private static final long serialVersionUID = 1L;
     private final String NAME;
     private final boolean isBad, isCurable;
     private int damage = 1;
     private int period = 3000;
-    private List<Symptom> symptoms;
+    transient private List<Symptom> symptoms;
     private final InfectionLevel level;
 
     public AbstractDisease(String NAME, boolean isBad, boolean isCurable, InfectionLevel level){
@@ -121,5 +122,18 @@ public abstract class AbstractDisease implements Serializable,Disease {
 
     public int getPeriod() {
         return period;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractDisease{" +
+                "NAME='" + NAME + '\'' +
+                ", isBad=" + isBad +
+                ", isCurable=" + isCurable +
+                ", damage=" + damage +
+                ", period=" + period +
+                ", symptoms=" + symptoms +
+                ", level=" + level +
+                '}';
     }
 }

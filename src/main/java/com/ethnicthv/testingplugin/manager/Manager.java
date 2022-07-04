@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 public class Manager implements Listener {
@@ -21,7 +22,11 @@ public class Manager implements Listener {
 
     Map<UUID, List<Disease>> data = new HashMap<>();
 
+    private final JavaPlugin plugin;
+
     public Manager(@NotNull JavaPlugin plugin){
+        this.plugin = plugin;
+
         //Create data folder
         path = plugin.getDataFolder().getAbsolutePath() + "/playerdata";
         File file = new File(path);
@@ -33,7 +38,7 @@ public class Manager implements Listener {
         //
 
         //Setup Events
-        plugin.getServer().getPluginManager().registerEvents(this,plugin);
+        this.plugin.getServer().getPluginManager().registerEvents(this,plugin);
         //
 
         //Setup ticker
@@ -41,15 +46,35 @@ public class Manager implements Listener {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, ticker, 20L, 20L);
     }
 
+    /**
+     * Add a Disease to a Player
+     * @param uuid the uuid of infected player
+     * @param disease the disease that infecting the player
+     */
+    public void addDisease(UUID uuid, Disease disease){
+        if (data.get(uuid).contains(disease)){
+            int index = data.get(uuid).indexOf(disease);
+            Disease temp = data.get(uuid).get(index);
+
+        }else{
+            data.get(uuid).add(disease);
+        }
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
+        plugin.getLogger().log( Level.INFO,"Player Join: Loading Data");
         UUID uuid = event.getPlayer().getUniqueId();
         if(!data.containsKey(uuid)){
             try {
                 if(!load(uuid)){
+                    plugin.getLogger().log( Level.INFO,"Player Join: No Data Found");
                     data.put(uuid, new ArrayList<>());
+                }else{
+                    plugin.getLogger().log( Level.INFO,"Player Join: Data Loaded");
                 }
             } catch (IOException e) {
+                plugin.getLogger().log( Level.WARNING,"Player Join: Load Fail");
                 e.printStackTrace();
             }
         }
@@ -58,15 +83,28 @@ public class Manager implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
         UUID uuid = event.getPlayer().getUniqueId();
+        plugin.getLogger().log( Level.INFO,"Player Join: Saving Data");
         if(data.containsKey(uuid)){
             try {
-                if(!save(uuid)){
+                if(save(uuid)){
                     data.remove(uuid);
                 }
             } catch (IOException e) {
+                plugin.getLogger().log( Level.WARNING,"Player Join: Save Fail");
                 e.printStackTrace();
             }
         }
+    }
+
+    public void saveWhenServerShutdown(){
+        data.forEach((uuid, diseases) -> {
+            try {
+                save(uuid);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
     }
 
     /**
@@ -77,6 +115,7 @@ public class Manager implements Listener {
      */
     boolean load(UUID uuid) throws IOException {
         File file = new File(path + "/" + uuid.toString());
+        plugin.getLogger().log( Level.INFO,"loading path: " + file.getAbsolutePath());
         if(file.exists()){
             FileInputStream input = new FileInputStream(file);
             ObjectInputStream objectinput = new ObjectInputStream(input);
@@ -105,15 +144,16 @@ public class Manager implements Listener {
      */
     boolean save(UUID uuid) throws IOException {
         File file = new File(path + "/" + uuid.toString());
-        if(file.exists()){
-            FileOutputStream output = new FileOutputStream(file);
-            ObjectOutput objectoutput = new ObjectOutputStream(output);
-            objectoutput.writeObject(data.get(uuid));
-            objectoutput.close();
-            output.close();
-            return true;
+        plugin.getLogger().log( Level.INFO,"saving path: " + file.getAbsolutePath());
+        if(!file.exists()){
+            file.createNewFile();
         }
-        return false;
+        FileOutputStream output = new FileOutputStream(file);
+        ObjectOutput objectoutput = new ObjectOutputStream(output);
+        objectoutput.writeObject(data.get(uuid));
+        objectoutput.close();
+        output.close();
+        return true;
     }
 
     class Ticker implements Runnable {
@@ -130,5 +170,12 @@ public class Manager implements Listener {
                 diseases.forEach(disease -> Bukkit.getScheduler().runTask(plugin, () -> disease.onTick(player)));
             });
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Manager{" +
+                "data=" + data +
+                '}';
     }
 }
