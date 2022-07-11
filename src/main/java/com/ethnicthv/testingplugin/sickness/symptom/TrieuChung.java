@@ -7,4 +7,9 @@ public class TrieuChung extends AbstractSymptom{
     public boolean doEffect(Player... player) {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

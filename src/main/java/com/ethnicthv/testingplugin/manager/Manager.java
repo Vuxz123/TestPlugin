@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -43,7 +44,7 @@ public class Manager implements Listener {
 
         //Setup ticker
         ticker = new Ticker(plugin);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, ticker, 20L, 20L);
+        ticker.runTaskTimerAsynchronously(plugin,10,10);
     }
 
     /**
@@ -156,8 +157,10 @@ public class Manager implements Listener {
         return true;
     }
 
-    class Ticker implements Runnable {
+    class Ticker extends BukkitRunnable {
         JavaPlugin plugin;
+
+        int i = 0;
 
         Ticker(JavaPlugin plugin){
             this.plugin = plugin;
@@ -166,8 +169,13 @@ public class Manager implements Listener {
         @Override
         public void run() {
             data.forEach((uuid, diseases) -> {
-                Player player = plugin.getServer().getPlayer(uuid);
-                diseases.forEach(disease -> Bukkit.getScheduler().runTask(plugin, () -> disease.onTick(player)));
+                i++;
+                diseases.forEach(disease -> Bukkit.getScheduler().runTask(plugin, () -> {
+                    Player player = plugin.getServer().getPlayer(uuid);
+                    player.sendMessage("Test---" + i);
+
+                    disease.onTick(player);
+                }));
             });
         }
     }
