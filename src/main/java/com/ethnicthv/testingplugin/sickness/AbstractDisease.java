@@ -2,6 +2,7 @@ package com.ethnicthv.testingplugin.sickness;
 
 import com.ethnicthv.testingplugin.sickness.symptom.Symptom;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,8 +31,8 @@ public abstract class AbstractDisease implements Serializable , Disease {
      * @param player the player that has this disease
      */
     @Override
-    public void onTick(Player player){
-
+    public void onTick(@NotNull Player player){
+        symptoms.forEach(symptom -> symptom.doEffect(player));
     }
 
     /**
@@ -74,7 +75,7 @@ public abstract class AbstractDisease implements Serializable , Disease {
      */
     @Override
     public boolean isInfectious() {
-        return level == InfectionLevel.NONE ? false : true;
+        return level != InfectionLevel.NONE;
     }
 
     @Override

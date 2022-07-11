@@ -1,7 +1,5 @@
 package com.ethnicthv.testingplugin.sickness;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Serializable;
 
 public enum InfectionLevel implements Serializable {

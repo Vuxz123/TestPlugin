@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 public class Manager implements Listener {
@@ -56,7 +55,7 @@ public class Manager implements Listener {
         if (data.get(uuid).contains(disease)){
             int index = data.get(uuid).indexOf(disease);
             Disease temp = data.get(uuid).get(index);
-
+            //Do something here -[Disease State - WIP]-
         }else{
             data.get(uuid).add(disease);
         }
@@ -147,7 +146,9 @@ public class Manager implements Listener {
         File file = new File(path + "/" + uuid.toString());
         plugin.getLogger().log( Level.INFO,"saving path: " + file.getAbsolutePath());
         if(!file.exists()){
-            file.createNewFile();
+            if(file.createNewFile()){
+                plugin.getLogger().log( Level.INFO,"<create new saving file>");
+            }
         }
         FileOutputStream output = new FileOutputStream(file);
         ObjectOutput objectoutput = new ObjectOutputStream(output);
@@ -172,6 +173,7 @@ public class Manager implements Listener {
                 i++;
                 diseases.forEach(disease -> Bukkit.getScheduler().runTask(plugin, () -> {
                     Player player = plugin.getServer().getPlayer(uuid);
+                    assert player != null;
                     player.sendMessage("Test---" + i);
 
                     disease.onTick(player);
