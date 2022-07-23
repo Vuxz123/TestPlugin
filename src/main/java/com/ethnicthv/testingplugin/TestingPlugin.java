@@ -1,5 +1,7 @@
 package com.ethnicthv.testingplugin;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.ethnicthv.testingplugin.manager.Manager;
 import com.ethnicthv.testingplugin.sickness.disease.Benh;
 import org.bukkit.entity.Player;
@@ -7,12 +9,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 
 public final class TestingPlugin extends JavaPlugin {
-    Manager manager;
+    private ProtocolManager protocolManager;
+    private Manager manager;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         manager = new Manager(this);
+        protocolManager = ProtocolLibrary.getProtocolManager();
 
         //testing setup
         test();
@@ -34,7 +38,11 @@ public final class TestingPlugin extends JavaPlugin {
         });
         this.getCommand("datalist").setExecutor((sender, command, label, args) -> {
             if(sender instanceof Player){
-                sender.sendMessage(manager.toString());
+                if(args[0].equals("disease")){
+                    sender.sendMessage(manager.toString(0));
+                    return true;
+                }
+                sender.sendMessage(manager.toString(1));
                 return true;
             }
             return false;

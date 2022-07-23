@@ -1,6 +1,7 @@
 package com.ethnicthv.testingplugin.manager;
 
 import com.ethnicthv.testingplugin.sickness.Disease;
+import com.ethnicthv.testingplugin.sickness.symptom.Symptom;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,14 +21,14 @@ public class Manager implements Listener {
 
     private final Ticker ticker;
 
-    Map<UUID, List<Disease>> data = new HashMap<>();
-
+    Map<UUID, List<Disease>> diseasedata = new HashMap<>();
+    Map<UUID, List<Symptom>> symptomdata = new HashMap<>();
     private final JavaPlugin plugin;
 
     public Manager(@NotNull JavaPlugin plugin){
         this.plugin = plugin;
 
-        //Create data folder
+        //Create diseasedata folder
         path = plugin.getDataFolder().getAbsolutePath() + "/playerdata";
         File file = new File(path);
         if(!file.exists()) {
@@ -52,12 +53,12 @@ public class Manager implements Listener {
      * @param disease the disease that infecting the player
      */
     public void addDisease(UUID uuid, Disease disease){
-        if (data.get(uuid).contains(disease)){
-            int index = data.get(uuid).indexOf(disease);
-            Disease temp = data.get(uuid).get(index);
+        if (diseasedata.get(uuid).contains(disease)){
+            int index = diseasedata.get(uuid).indexOf(disease);
+            Disease temp = diseasedata.get(uuid).get(index);
             //Do something here -[Disease State - WIP]-
         }else{
-            data.get(uuid).add(disease);
+            diseasedata.get(uuid).add(disease);
         }
     }
 
@@ -65,11 +66,11 @@ public class Manager implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event){
         plugin.getLogger().log( Level.INFO,"Player Join: Loading Data");
         UUID uuid = event.getPlayer().getUniqueId();
-        if(!data.containsKey(uuid)){
+        if(!diseasedata.containsKey(uuid)){
             try {
                 if(!load(uuid)){
                     plugin.getLogger().log( Level.INFO,"Player Join: No Data Found");
-                    data.put(uuid, new ArrayList<>());
+                    diseasedata.put(uuid, new ArrayList<>());
                 }else{
                     plugin.getLogger().log( Level.INFO,"Player Join: Data Loaded");
                 }
@@ -84,10 +85,10 @@ public class Manager implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event){
         UUID uuid = event.getPlayer().getUniqueId();
         plugin.getLogger().log( Level.INFO,"Player Join: Saving Data");
-        if(data.containsKey(uuid)){
+        if(diseasedata.containsKey(uuid)){
             try {
                 if(save(uuid)){
-                    data.remove(uuid);
+                    diseasedata.remove(uuid);
                 }
             } catch (IOException e) {
                 plugin.getLogger().log( Level.WARNING,"Player Join: Save Fail");
@@ -97,7 +98,7 @@ public class Manager implements Listener {
     }
 
     public void saveWhenServerShutdown(){
-        data.forEach((uuid, diseases) -> {
+        diseasedata.forEach((uuid, diseases) -> {
             try {
                 save(uuid);
             } catch (IOException e) {
@@ -108,7 +109,7 @@ public class Manager implements Listener {
     }
 
     /**
-     * Load data of a player
+     * Load diseasedata of a player
      * @param uuid the uuid of joining player
      * @return return if the loading is success
      * @throws IOException throw when something wrong with input
@@ -120,11 +121,18 @@ public class Manager implements Listener {
             FileInputStream input = new FileInputStream(file);
             ObjectInputStream objectinput = new ObjectInputStream(input);
             try {
-                List<Disease> temp = (List<Disease>) objectinput.readObject();
-                if (data.containsKey(uuid)) {
-                    data.replace(uuid, temp);
+                List<Object> a = (List<Object>) objectinput.readObject();
+                List<Disease> temp1 = (List<Disease>) a.get(0);
+                if (diseasedata.containsKey(uuid)) {
+                    diseasedata.replace(uuid, temp1);
                 } else {
-                    data.put(uuid, temp);
+                    diseasedata.put(uuid, temp1);
+                }
+                List<Symptom> temp2 = (List<Symptom>) a.get(1);
+                if (symptomdata.containsKey(uuid)) {
+                    symptomdata.replace(uuid, temp2);
+                } else {
+                    symptomdata.put(uuid, temp2);
                 }
                 return true;
             } catch (ClassNotFoundException e) {
@@ -137,7 +145,7 @@ public class Manager implements Listener {
     }
 
     /**
-     * Save data of a player
+     * Save diseasedata of a player
      * @param uuid the uuid of leaving player
      * @return return if the saving is success
      * @throws IOException throw when something wrong with output
@@ -150,9 +158,12 @@ public class Manager implements Listener {
                 plugin.getLogger().log( Level.INFO,"<create new saving file>");
             }
         }
+        List<Object> a = new ArrayList<>();
+        a.add(diseasedata.get(uuid));
+        a.add(symptomdata.get(uuid));
         FileOutputStream output = new FileOutputStream(file);
         ObjectOutput objectoutput = new ObjectOutputStream(output);
-        objectoutput.writeObject(data.get(uuid));
+        objectoutput.writeObject(a);
         objectoutput.close();
         output.close();
         return true;
@@ -169,23 +180,23 @@ public class Manager implements Listener {
 
         @Override
         public void run() {
-            data.forEach((uuid, diseases) -> {
-                i++;
+            diseasedata.forEach((uuid, diseases) -> {
                 diseases.forEach(disease -> Bukkit.getScheduler().runTask(plugin, () -> {
                     Player player = plugin.getServer().getPlayer(uuid);
                     assert player != null;
-                    player.sendMessage("Test---" + i);
-
-                    disease.onTick(player);
+                    try{
+                        disease.onTick(player);
+                    }catch(IllegalArgumentException e){
+                        if(player.isOnline()){
+                            e.printStackTrace();
+                        }
+                    }
                 }));
             });
         }
     }
 
-    @Override
-    public String toString() {
-        return "Manager{" +
-                "data=" + data +
-                '}';
+    public String toString(int a) {
+        return a == 0 ? diseasedata.toString() :  symptomdata.toString();
     }
 }

@@ -14,7 +14,7 @@ public abstract class AbstractDisease implements Serializable , Disease {
     private final boolean isBad, isCurable;
     private int damage = 1;
     private int period = 3000;
-    transient private List<Symptom> symptoms;
+    private List<Symptom> symptoms;
     private final InfectionLevel level;
 
     public AbstractDisease(String NAME, boolean isBad, boolean isCurable, InfectionLevel level){
